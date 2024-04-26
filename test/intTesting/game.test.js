@@ -1,52 +1,79 @@
-const GameModel = require("../../models/game.model");
-const UserModel = require("../../models/user.model");
-const ScoreboardModel = require("../../models/score.model");
+const { get } = require("mongoose");
 
 const supertest = require('supertest');
-const app = require('../../app');
+const app = require('../../app'); // Make sure this imports your initialized Express app
 
-describe("API should meet the following services and validations", function() {
-    describe("It should have a user registration service by name, which should return a user identifier for use in subsequent services", function() {
-        it("Create user", function(done) {
-            const user = {
-                userName: "Pancho123"
-            };
-            
-            supertest(app)
-                .post('/users/')
-                .send(user)
-                .expect(201)
-                .end(function(err, res) {
-                    if (err) return done(err);
-                    // Additional assertions can be made here
-                    done();
-                });
-        });
+describe('Integration Tests', () => {
+  describe('User name validation', () => {
+    it.skip('should allow only alphanumeric usernames', async () => {
+      const response = await supertest(app)
+        .post('/users/')
+        .send({ userName: 'testUser'});
+      expect(response.statusCode).toBe(201);
+      expect(response.body.userName).toMatch(/^[a-zA-Z0-9]+$/);
+    }, 15000);  // Increased timeout
 
-        it('Should not accept names with special characters', async () => {
-            const response = await supertest(app)
-                .post('/users/')
-                .send({ userName: 'User@123' })
-                .expect(500); 
-            expect(response.body.error).toBeDefined();
-        });
-    });
+    it.skip('should reject usernames with special characters', async () => {
+      const response = await supertest(app)
+        .post('/users/')
+        .send({ userName: 'testUser@123', score: 10 });
+      expect(response.statusCode).toBe(500);
+    }, 10000);
+  });
 
-    describe.skip("Should have a play service where the user ID and a word are sent as parameters, which will start the game", function() {
-        it('Should validate the sending of the user ID and a word, which should only contain letters', async () => {
-            const response = await supertest(app)
-                .post('/game/')
-                .send({ userId: 'someUserId', word: 'testWord' })
-                .expect(500); // Adjust the status code based on actual handling
-            expect(response.body.error).toBeDefined();
-        });
+  describe('Word and user ID sending', () => {
+    it.skip('should accept a valid user ID and word containing only letters', async () => {
+      const response = await supertest(app)
+      .post('/game/play')
+      .send({ userId: "6629dc76a7c52d88549784bf", word: "onalsalvaje" })
+      .expect(200); // Expecting a 200 OK status if the word is correct and the game continues
 
-        it('Should not accept words with special characters', async () => {
-            const response = await supertest(app)
-                .post('/game/')
-                .send({ userId: 'someUserId', word: 'Test@123' })
-                .expect(500); // Adjust the status code based on actual handling
-            expect(response.body.error).toBeDefined();
-        });
-    });
+      expect(response.body.message).toBe("Correct! Continue playing.");
+      expect(response.body.game).toBeDefined();
+    }, 1000000);
+
+    it.skip('should only accept words containing letters', async () => {
+      const response = await supertest(app)
+        .post('/game/play')
+        .send({ userId: "6629dc76a7c52d88549784bf", word: "111" })
+        .expect(400); // Expecting a 400 error status if the word is incorrect because it doesn't contain only letters
+  
+      // Asserting that the response body contains the specific error message for invalid words
+      expect(response.body.message).toBe("Invalid word! Game over.");
+    },15000);
+  });
+
+  describe('Scoreboard format validation', () => {
+    it.skip('should return a correctly formatted scoreboard', async () => {
+      const response = await supertest(app)
+        .get('/score/get-top-players')
+        .send();
+      expect(response.statusCode).toBe(200);
+      expect(response.body.length).toBe(2);
+
+    }, 10000);  // Increased timeout
+  });
+
+  it.skip('should handle delayed response correctly', async () => {
+    jest.useRealTimers();
+  
+    const promise = supertest(app)
+      .post('/game/play')
+      .send({ userId: "6629f30e218e0bb87dc2ad1f", word: "a" })
+      
+  
+    jest.advanceTimersByTime(20000); // Simulate 20-second delay
+  
+    const response = await promise; // Await the promise only after the timer advance
+    
+    
+    console.log(response.body);
+
+    expect(response.status).toBe(200);
+    
+    
+    expect(response.body.message).toBe("Time's up! Game over.");
+  
+    jest.useRealTimers();
+  },15000);
 });

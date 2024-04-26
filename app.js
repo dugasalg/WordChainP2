@@ -3,20 +3,17 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var mongoose = require("mongoose");
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var gameRouter = require('./routes/game');
-var scoreboardRouter = require('./routes/score');
+var gameRouter = require('./routes/game'); // Ensure this is correctly linked
+var scoreboardRouter = require('./routes/score'); // Ensure this is correctly linked
 
-
-
-
-const dataBaseURL = "mongodb+srv://dugatabacc:bVfvoFf0WEUhFjm7@clusterulsa.l8kv3qi.mongodb.net/"
-
+const dataBaseURL = "mongodb+srv://dugatabacc:bVfvoFf0WEUhFjm7@clusterulsa.l8kv3qi.mongodb.net/UnitTest"
 
 mongoose.connect(dataBaseURL);
-mongoose.connection.on('open',function(){
+mongoose.connection.on('open', function() {
   console.log("Connection Ok")
 })
 
@@ -34,6 +31,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/game', gameRouter); // Adding game routes
+app.use('/score', scoreboardRouter); // Adding scoreboard routes
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

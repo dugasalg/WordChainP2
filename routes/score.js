@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
-const scoreboardController = require('../controllers/scoreboard.controller'); // Ensure this matches the actual filename
+const scoreboardController = require('../controllers/score.controller');
 
 // Route to create a new scoreboard
 router.post('/new-scoreboard', scoreboardController.createScoreboard);

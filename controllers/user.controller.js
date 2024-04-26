@@ -1,4 +1,4 @@
-const UserModel = require('../models/user.model');
+const UserModel = require('../models/user.models');
 
 async function createUser(req, res) {
     try {
@@ -9,7 +9,7 @@ async function createUser(req, res) {
         await newUser.save();
         res.status(201).json(newUser);
     } catch (error) {
-        res.status(500).json({ message: "Error creating user", error: error.toString() });
+        res.status(500).json({ message: "Invalid characters, only letters", error: error.toString() });
     }
 }
 

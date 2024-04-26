@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
-const gameController = require('../controllers/game.controller'); // Adjusted reference to English-named controller
+const gameController = require('../controllers/game.controller');
 
 // Route to create a new game
 router.post('/new-game', gameController.createGame);

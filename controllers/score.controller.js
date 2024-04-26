@@ -1,5 +1,5 @@
-const ScoreboardModel = require('../models/score.model');
-const UserModel = require('../models/user.model');
+const ScoreboardModel = require('../models/score.models');
+const UserModel = require('../models/user.models');
 
 async function createScoreboard(req, res) {
     try {
@@ -40,7 +40,10 @@ async function addUserToScoreboard(req, res) {
 
 async function getTopPlayers(req, res) {
     try {
-        const scoreboard = await ScoreboardModel.findOne().populate('users.userId', 'userName score');
+        const scoreboard = await ScoreboardModel.findOne().populate({
+            path: 'users.userId',
+            select: 'userName score'  // Asegúrate de que los campos son correctos según tu modelo de Usuario
+        });
         if (!scoreboard) {
             return res.status(404).json({ message: "Scoreboard not found" });
         }
